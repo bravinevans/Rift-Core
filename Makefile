@@ -1,22 +1,23 @@
-ARCH := x86_64
-TARGET ?= x86_64-unknown-none
-CARGO ?= cargo
-KERNEL_ELF := target/$(TARGET)/release/rift-kernel
+ARCH ?= x86_64
+BUILD_DIR := build
+KERNEL_MANIFEST := kernel/Cargo.toml
+TARGET := $(ARCH)-unknown-none
+KERNEL_ELF := kernel/target/$(TARGET)/release/rift-kernel
+ISO_DIR := $(BUILD_DIR)/iso
 
-.PHONY: all kernel check fmt clean
+.PHONY: all kernel iso clean
 
-all: kernel
+all: iso
 
 kernel:
-	$(CARGO) build --workspace --target $(TARGET) --release
-	@echo "Kernel ELF built: $(KERNEL_ELF)"
+	cargo build --manifest-path $(KERNEL_MANIFEST) --target $(TARGET) --release
 
-check:
-	$(CARGO) check --workspace --target $(TARGET)
-
-fmt:
-	$(CARGO) fmt --all -- --check
+iso: kernel
+	mkdir -p $(ISO_DIR)/boot
+	cp $(KERNEL_ELF) $(ISO_DIR)/boot/rift-kernel.elf
+	cp boot/limine.cfg $(ISO_DIR)/boot/limine.cfg
+	@echo "Limine ISO staging complete. Use limine-deploy $(ISO_DIR) to produce the final disk image."
 
 clean:
-	$(CARGO) clean
-	rm -rf build
+	cargo clean --manifest-path $(KERNEL_MANIFEST)
+	rm -rf $(BUILD_DIR)
