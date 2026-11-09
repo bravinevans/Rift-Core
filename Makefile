@@ -1,18 +1,22 @@
 ARCH := x86_64
-BUILD_DIR := build
+TARGET ?= x86_64-unknown-none
+CARGO ?= cargo
+KERNEL_ELF := target/$(TARGET)/release/rift-kernel
 
-.PHONY: all clean kernel userland
+.PHONY: all kernel check fmt clean
 
-all: kernel userland
-	@echo "Build complete. Rift Core image is in $(BUILD_DIR)/rift-core.iso"
+all: kernel
 
 kernel:
-	$(MAKE) -C kernel
+	$(CARGO) build --workspace --target $(TARGET) --release
+	@echo "Kernel ELF built: $(KERNEL_ELF)"
 
-userland:
-	$(MAKE) -C userland
+check:
+	$(CARGO) check --workspace --target $(TARGET)
+
+fmt:
+	$(CARGO) fmt --all -- --check
 
 clean:
-	$(MAKE) -C kernel clean
-	$(MAKE) -C userland clean
-	rm -rf $(BUILD_DIR)/*
+	$(CARGO) clean
+	rm -rf build

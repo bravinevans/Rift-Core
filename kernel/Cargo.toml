@@ -1,0 +1,10 @@
+[package]
+name = "rift-kernel"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "rift-kernel"
+path = "core/lib.rs"
+test = false
+bench = false
